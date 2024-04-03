@@ -3,6 +3,8 @@
 A Node.js template of the [Yue library](https://github.com/yue/yue) for building
 cross-platform desktop apps with system webview and native GUI widgets.
 
+For a real world example, check the open source [Chie](https://chie.app) app.
+
 ## Features
 
 * Build desktop apps with Node.js, system webview and native UI.

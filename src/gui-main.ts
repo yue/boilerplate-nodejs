@@ -18,10 +18,13 @@ if (process.platform == 'darwin') {
 // Create GUI.
 function guiMain() {
   registerCustomProtocol();
+  if (process.platform == 'darwin') {
+    createAppMenu();
+  }
 
   // Create main window.
   const mainWindow = gui.Window.create({});
-  mainWindow.setContentSize({width: 400, height: 400});
+  mainWindow.setContentSize({width: 400, height: 250});
   mainWindow.setContentView(createBrowser());
   mainWindow.center();
   mainWindow.activate();
@@ -52,4 +55,46 @@ function createBrowser() {
   });
   browser.loadURL('app://host/index.html');
   return browser;
+}
+
+// Create application menu.
+function createAppMenu() {
+  const menu = gui.MenuBar.create([
+    {
+      label: require('../package.json').build.productName,
+      submenu: [
+        { role: 'hide' },
+        { role: 'hide-others' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        {
+          label: 'Quit',
+          accelerator: 'CmdOrCtrl+Q',
+          onClick() { gui.MessageLoop.quit(); },
+        },
+      ],
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'select-all' },
+      ],
+    },
+    {
+      label: 'Window',
+      role: 'window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'maximize' },
+        { role: 'close-window' },
+      ],
+    },
+  ]);
+  gui.app.setApplicationMenu(menu);
 }
