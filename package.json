@@ -7,7 +7,7 @@
     "appId": "org.yue.boilerplate",
     "productName": "Boilerplate",
     "copyright": "Copyright © 2024 Yue. All rights reserved.",
-    "unpackDir": "assets/icons",
+    "unpackDir": "app",
     "ignore": [
       "assets/build"
     ],

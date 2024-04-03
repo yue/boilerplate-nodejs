@@ -1,0 +1,24 @@
+<html>
+<head>
+  <style>
+    * { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+    html { color: #333; font-size: 1.2em; }
+    body { max-width: 40rem; padding: 2rem; margin: auto; }
+  </style>
+</head>
+<body>
+  <p>
+    User agent: <strong id="browserVersion"></strong>.
+  </p>
+  <p>
+    And the Node.js version is <strong id="nodeVersion"></strong>.
+  </p>
+  <script>
+    function reportNodeVersion(ver) {
+      nodeVersion.innerText = ver;
+    }
+    browserVersion.innerText = navigator.userAgent;
+    requestNodeVersion();
+  </script>
+</body>
+</html>
