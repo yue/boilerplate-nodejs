@@ -32,19 +32,19 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
         run: |
-          if [ -z $BUILD_CERTIFICATE_BASE64 ] || [ -z $P12_PASSWORD ] || [ -z $KEYCHAIN_PASSWORD ]; then
+          if [ -z "$BUILD_CERTIFICATE_BASE64" ] || [ -z "$P12_PASSWORD" ] || [ -z "$KEYCHAIN_PASSWORD" ]; then
             echo '::warning title=Must set BUILD_CERTIFICATE_BASE64/P12_PASSWORD/KEYCHAIN_PASSWORD secrets for signing app on macOS::Read more at https://docs.github.com/en/actions/deployment/deploying-xcode-applications/installing-an-apple-certificate-on-macos-runners-for-xcode-development'
             exit 0
           fi
-          if [ -z $APPLE_TEAM_ID ]; then
+          if [ -z "$APPLE_TEAM_ID" ]; then
             echo '::warning title=Must set APPLE_TEAM_ID secret for signing app on macOS::Read more at https://developer.apple.com/help/account/manage-your-team/locate-your-team-id/'
             exit 0
           fi
-          if [ -z $APPLE_ID ] || [ -z $APPLE_PASSWORD ]; then
+          if [ -z "$APPLE_ID" ] || [ -z "$APPLE_PASSWORD" ]; then
             echo '::warning title=Must set APPLE_ID/APPLE_PASSWORD secrets for notarizing app on macOS::Read more at https://github.com/lando/notarize-action'
             exit 0
           fi
-          echo "{mac-sign}={true}" >> $GITHUB_OUTPUT
+          echo "mac-sign=true" >> $GITHUB_OUTPUT
 
       - name: Checkout
         uses: actions/checkout@v4
