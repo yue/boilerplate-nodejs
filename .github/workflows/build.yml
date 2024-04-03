@@ -1,0 +1,158 @@
+name: build
+
+on: push
+
+jobs:
+  build:
+    runs-on: ${{ fromJson('{"linux":"ubuntu-22.04","mac":"macos-13","win":"windows-2022"}')[matrix.os] }}
+    continue-on-error: false
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [linux, win, mac]
+        arch: [x64]
+        include:
+          - os: win
+            arch: ia32
+          - os: mac
+            arch: arm64
+
+    steps:
+      # Check the secrets required for signing app on macOS.
+      - name: Check secrets
+        id: check-secrets
+        if: ${{ matrix.os == 'mac' && startsWith(github.ref, 'refs/tags/') }}
+        shell: bash
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+        run: |
+          if [ -z $BUILD_CERTIFICATE_BASE64 ] || [ -z $P12_PASSWORD ] || [ -z $KEYCHAIN_PASSWORD ]; then
+            echo '::warning title=Must set BUILD_CERTIFICATE_BASE64/P12_PASSWORD/KEYCHAIN_PASSWORD secrets for signing app on macOS::Read more at https://docs.github.com/en/actions/deployment/deploying-xcode-applications/installing-an-apple-certificate-on-macos-runners-for-xcode-development'
+            exit 0
+          fi
+          if [ -z $APPLE_TEAM_ID ]; then
+            echo '::warning title=Must set APPLE_TEAM_ID secret for signing app on macOS::Read more at https://developer.apple.com/help/account/manage-your-team/locate-your-team-id/'
+            exit 0
+          fi
+          if [ -z $APPLE_ID ] || [ -z $APPLE_PASSWORD ]; then
+            echo '::warning title=Must set APPLE_ID/APPLE_PASSWORD secrets for notarizing app on macOS::Read more at https://github.com/lando/notarize-action'
+            exit 0
+          fi
+          echo "{mac-sign}={true}" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set package version
+        shell: bash
+        run: |
+          # Set the version field in package.json to git tag name.
+          npm config set git-tag-version=false
+          npm version $(git describe --tags) || true
+          # Use production icons.
+          npm pkg set 'build.icons.mac'='assets/build/icon.icns'
+          npm pkg set 'build.icons.win'='assets/build/icon.ico'
+
+      - name: Build
+        env:
+          # Without this the CI job will encounter GitHub API rate limit due to
+          # the fetch-yode module pulling yode versions.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -e
+          npm install
+          npm publish --dry-run
+
+      - name: Create Distribution
+        if: ${{ !steps.check-secrets.outputs.mac-sign }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run dist -- --arch ${{ matrix.arch }}
+
+      - name: Install the Apple Certificate
+        if: steps.check-secrets.outputs.mac-sign
+        env:
+          # https://docs.github.com/en/actions/deployment/deploying-xcode-applications/installing-an-apple-certificate-on-macos-runners-for-xcode-development
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create variables.
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Import certificate from secrets.
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+          # Create temporary keychain.
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import certificate to keychain.
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Create App Bundle
+        if: steps.check-secrets.outputs.mac-sign
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: npm run build -- --arch ${{ matrix.arch }} --identity "$APPLE_TEAM_ID"
+
+      - name: Notarize Build
+        if: steps.check-secrets.outputs.mac-sign
+        uses: lando/notarize-action@v2
+        with:
+          product-path: out/Boilerplate.app
+          appstore-connect-username: ${{ secrets.APPLE_ID }}
+          appstore-connect-password: ${{ secrets.APPLE_PASSWORD }}
+          appstore-connect-team-id: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Create Distribution (macOS notarized build)
+        if: steps.check-secrets.outputs.mac-sign
+        run: |
+          VERSION=`node -e "process.stdout.write(require('./package.json').version)"`
+          xcrun stapler staple out/Boilerplate.app
+          ditto -c -k out boilerplate-v$VERSION-darwin-${{ matrix.arch }}.zip
+
+      - name: Upload Binary Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}-${{ matrix.arch }}
+          path: '*.zip'
+          retention-days: 1
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed by action-gh-release.
+      contents: write
+
+    steps:
+      - name: Download Files
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: Boilerplate ${{ github.ref_name }}
+          generate_release_notes: true
+          files: '*.zip'

@@ -1,0 +1,39 @@
+{
+  "name": "boilerplate",
+  "private": true,
+  "version": "0.0.1-dev",
+  "main": "dist/gui-main.js",
+  "build": {
+    "appId": "org.yue.boilerplate",
+    "productName": "Boilerplate",
+    "copyright": "Copyright © 2024 Yue. All rights reserved.",
+    "unpackDir": "assets/icons",
+    "ignore": [
+      "assets/build"
+    ],
+    "entitlements": "assets/build/entitlements.plist",
+    "icons": {
+      "mac": "assets/build/icon-dev.icns",
+      "win": "assets/build/icon-dev.ico"
+    }
+  },
+  "scripts": {
+    "prepack": "tsc",
+    "start": "yode node_modules/ts-node/dist/bin.js src/gui-main.ts",
+    "build": "yackage build out",
+    "dist": "yackage dist out"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "fetch-yode": "1.x",
+    "gui": "0.15.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.x",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.3",
+    "yackage": "0.9.x"
+  }
+}
