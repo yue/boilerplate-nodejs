@@ -24,6 +24,7 @@ function guiMain() {
 
   // Create main window.
   const mainWindow = gui.Window.create({});
+  mainWindow.onClose = () => gui.MessageLoop.quit();
   mainWindow.setContentSize({width: 400, height: 250});
   mainWindow.setContentView(createBrowser());
   mainWindow.center();
