@@ -8,10 +8,16 @@ For a real world example, check the open source [Chie](https://chie.app) app.
 ## Features
 
 * Build desktop apps with Node.js, system webview and native UI.
-* Generate single-file executables for Linux/Windows.
+* Generate portable executables for Linux/Windows.
 * Generate signed app bundle for macOS.
 * Add Node.js bindings to web pages.
 * Custom protocols in webview.
+
+## Screenshots
+
+|  macOS            |    Linux          |  Windows          |
+| ----------------- | ----------------- | ----------------- |
+| ![][mac-shot]     | ![][lin-shot]     | ![][win-shot]     |
 
 ## How to use
 
@@ -29,3 +35,7 @@ For a real world example, check the open source [Chie](https://chie.app) app.
 ## License
 
 Public domain.
+
+[mac-shot]: https://github.com/yue/boilerplate-nodejs/assets/639601/5191c3df-60df-4647-a665-f8a9d39ba242
+[lin-shot]: https://github.com/yue/boilerplate-nodejs/assets/639601/29e4af2b-8ad4-4bb8-8648-0ad42f66a853
+[win-shot]: https://github.com/yue/boilerplate-nodejs/assets/639601/a9442e5a-bb4b-4501-9f04-49217cd5535f
