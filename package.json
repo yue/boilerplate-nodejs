@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "fetch-yode": "1.x",
-    "gui": "0.15.1"
+    "gui": "0.15.3"
   },
   "devDependencies": {
     "@types/node": "20.x",
