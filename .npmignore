@@ -1,6 +1,5 @@
 # Unused source files
 /src/
-/types/
 .github
 tsconfig.json
 

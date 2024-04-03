@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "declarationDir": "types",
     "baseUrl": "src",
     "outDir": "dist",
     "allowJs": true,

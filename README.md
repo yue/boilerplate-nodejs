@@ -21,7 +21,7 @@ cross-platform desktop apps with system webview and native GUI widgets.
 
 ## Docs
 
-* [Sign mac app](https://github.com/yue/boilerplate-js/blob/main/docs/sign-mac-app.md)
+* [Sign mac app](https://github.com/yue/boilerplate-nodejs/blob/main/docs/sign-mac-app.md)
 * [Yue documents (external link)](http://libyue.com/docs/latest/js/)
 
 ## License
