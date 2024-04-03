@@ -1,4 +1,4 @@
-# Sign mac app
+# How to sign macOS app in CI
 
 This template has a GitHub workflow that signs and the notorizes the app bundle,
 and you need to set following secrects in repo/orgnaization to make it work.

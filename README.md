@@ -29,7 +29,8 @@ For a real world example, check the open source [Chie](https://chie.app) app.
 
 ## Docs
 
-* [Sign mac app](https://github.com/yue/boilerplate-nodejs/blob/main/docs/sign-mac-app.md)
+* [Architecture](https://github.com/yue/boilerplate-nodejs/blob/main/docs/architecture.md)
+* [How to sign macOS app in CI](https://github.com/yue/boilerplate-nodejs/blob/main/docs/sign-mac-app.md)
 * [Yue documents (external link)](http://libyue.com/docs/latest/js/)
 
 ## License
